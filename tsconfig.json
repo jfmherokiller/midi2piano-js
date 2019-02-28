@@ -4,7 +4,8 @@
     "noImplicitAny": false,
     "removeComments": false,
     "sourceMap": true,
-    "target": "es5"
+    "target": "es6",
+    "module": "commonjs"
   },
   "exclude": [
     "node_modules",
@@ -14,6 +15,10 @@
     "src/app.ts",
     "src/processing.ts",
     "src/utilityfunctions.ts",
-    "src/MidiFile.ts"
+    "src/MidiFile.ts",
+    "src/ported-classes.ts",
+    "src/midi2piano-port.ts",
+    "src/midi2piano-original.ts",
+    "src/commandline-main.ts"
   ]
 }
