@@ -1,4 +1,4 @@
-﻿///<reference path="../typings/globals/node/index.d.ts" />
+﻿
 import {Midifile} from "./MidiFile";
 import {getnotes, CreateDBLines, GetTempo, CreateFileString} from "./utilityfunctions";
 
