@@ -61,18 +61,18 @@ class Midifile {
     lastEventTypeByte;
     header:MidiHeader;
     stream: StringStream;
-    tracks:IEvent[][] = new Array();
+    tracks:IEvent[][] = [];
     constructor(data: string) {
         let ticksPerBeat: number;
         this.stream = new StringStream(data);
-        const headerChunk = this.readChunk(this.stream);
+        const headerChunk = Midifile.readChunk(this.stream);
         if (headerChunk.id !== "MThd" || headerChunk.length !== 6) {
             throw "Bad .mid file - header not found";
         }
-        var headerStream = new StringStream(headerChunk.data);
-        var formatType = headerStream.readInt16();
-        var trackCount = headerStream.readInt16();
-        var timeDivision = headerStream.readInt16();
+        const headerStream = new StringStream(headerChunk.data);
+        const formatType = headerStream.readInt16();
+        const trackCount = headerStream.readInt16();
+        const timeDivision = headerStream.readInt16();
 
         if (timeDivision & 0x8000) {
             throw "Expressing time division in SMTPE frames is not supported yet";
@@ -83,34 +83,34 @@ class Midifile {
 
         for (let i = 0; i < this.header.trackCount; i++) {
             this.tracks[i] = new Array<IEvent>();
-            let trackChunk = this.readChunk(this.stream);
+            let trackChunk = Midifile.readChunk(this.stream);
             if (trackChunk.id !== "MTrk") {
                 throw "Unexpected chunk - expected MTrk, got " + trackChunk.id;
             }
             let trackStream = new StringStream(trackChunk.data);
             while (!trackStream.eof()) {
-                var event = this.readEvent(trackStream);
+                const event = this.readEvent(trackStream);
                 this.tracks[i].push(event);
                 //console.log(event);
             }
         }
     }
-    readChunk(stream: StringStream): Chunk {
+    static readChunk(stream: StringStream): Chunk {
         const id = stream.read(4);
         const length = stream.readInt32();
         return new Chunk(id, length, stream.read(length));
     }
     readEvent(stream:StringStream) {
-        var event = <IEvent>({});
+        const event = <IEvent>({});
         event.deltaTime = stream.readVarInt();
-        var eventTypeByte = stream.readInt8();
+        let eventTypeByte = stream.readInt8();
         if ((eventTypeByte & 0xf0) === 0xf0) {
             /* system / meta event */
-            var length: number;
+            let length: number;
             if (eventTypeByte === 0xff) {
                 /* meta event */
                 event.type = "meta";
-                var subtypeByte = stream.readInt8();
+                const subtypeByte = stream.readInt8();
                 length = stream.readVarInt();
                 switch (subtypeByte) {
                     case 0x00:
@@ -167,7 +167,7 @@ class Midifile {
                     case 0x54:
                         event.subtype = "smpteOffset";
                         if (length !== 5) throw "Expected length for smpteOffset event is 5, got " + length;
-                        var hourByte = stream.readInt8();
+                        const hourByte = stream.readInt8();
                         event.frameRate = {
                             0x00: 24, 0x20: 25, 0x40: 29, 0x60: 30
                         }[hourByte & 0x60];
@@ -218,7 +218,7 @@ class Midifile {
             }
         } else {
             /* channel event */
-            var param1;
+            let param1;
             if ((eventTypeByte & 0x80) === 0) {
                 /* running status - reuse lastEventTypeByte as the event type.
                     eventTypeByte is actually the first parameter
@@ -229,7 +229,7 @@ class Midifile {
                 param1 = stream.readInt8();
                 this.lastEventTypeByte = eventTypeByte;
             }
-            var eventType = eventTypeByte >> 4;
+            const eventType = eventTypeByte >> 4;
             event.channel = eventTypeByte & 0x0f;
             event.type = "channel";
             switch (eventType) {
@@ -294,14 +294,14 @@ class StringStream {
 
 
     read(length) {
-        var result = this.str.substr(this.position, length);
+        const result = this.str.substr(this.position, length);
         this.position += length;
         return result;
     }
 
     /* read a big-endian 32-bit integer */
     readInt32() {
-        var result = (
+        const result = (
             (this.str.charCodeAt(this.position) << 24)
             + (this.str.charCodeAt(this.position + 1) << 16)
             + (this.str.charCodeAt(this.position + 2) << 8)
@@ -312,7 +312,7 @@ class StringStream {
 
     /* read a big-endian 16-bit integer */
     readInt16() {
-        var result = (
+        const result = (
             (this.str.charCodeAt(this.position) << 8)
             + this.str.charCodeAt(this.position + 1));
         this.position += 2;
@@ -343,7 +343,7 @@ class StringStream {
     readVarInt() {
         let result = 0;
         while (true) {
-            var b = this.readInt8();
+            const b = this.readInt8();
             if (b & 0x80) {
                 result += (b & 0x7f);
                 result <<= 7;
@@ -355,4 +355,4 @@ class StringStream {
     }
 }
 
-export {Midifile}
+export {Midifile,IEvent}
