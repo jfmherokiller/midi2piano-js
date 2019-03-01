@@ -7,7 +7,6 @@ function parsethefile(midi) {
     let download = require("downloadjs");
     let OutputPanel = document.getElementById("PianoOutput");
     OutputPanel.value = fileStuff.OutputTxt;
-    download(fileStuff.OutputTxt, "songtest.txt", "text/plain");
     console.log("AAAAAAA");
 }
 exports.parsethefile = parsethefile;
