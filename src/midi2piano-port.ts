@@ -30,7 +30,12 @@ class Form1_port {
     public OutputTxt;
     public notes: PNote[];
     public tempo:number;
-
+    public MaxCharsPerLine;
+    public MaxLines;
+    constructor(InterMaxChars,InterMaxLines) {
+        this.MaxCharsPerLine = InterMaxChars;
+        this.MaxLines = InterMaxLines;
+    }
     public importMIDIToolStripMenuItem_Click_Port(midiString: string) {
         this.notes = [];
         let curNote = PNote.Default;
@@ -189,10 +194,10 @@ class Form1_port {
         let output = "";
         let lineCount = 1;
         for (let n of this.notes) {
-            if (line.length + n.Note.length + 1 > 501) {
+            if (line.length + n.Note.length + 1 > (this.MaxCharsPerLine+1)) {
                 output += line.substring(0, line.length - 1) + "\r\n";
                 line = "";
-                if (lineCount == 9)
+                if (lineCount == this.MaxLines)
                     break;
                 lineCount++;
             }
