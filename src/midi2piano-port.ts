@@ -65,7 +65,7 @@ class Form1_port {
             delta += note.deltaTime;
             if (note.subtype === "noteOn") {
                 if (curNote.Note != "") {
-                    curNote.Length = +(delta / 1000).toFixed(2);
+                    curNote.Length = (delta / 1000);
                     delta = 0;
                     let newNote: PNote = Object.assign({}, curNote);
                     this.notes.push(newNote);
@@ -118,7 +118,7 @@ class Form1_port {
         } else {
             arg = "n";
         }
-        octave = Math.round((n / 12 - 1)).toString();
+        octave = Math.floor((n / 12 - 1)).toString();
 
         return name + arg + octave;
     }
@@ -154,14 +154,14 @@ class Form1_port {
         let winner = 1;
         let score = 0;
         for (let kv of scores) {
-            if (kv[0] > score) {
+            if (kv[1] > score) {
                 winner = kv[0];
                 score = kv[1];
             }
         }
         // realign all of them to match beat length
         for (let i = 0; i < this.notes.length; i++) {
-            this.notes[i] = new PNote(+(this.notes[i].Length / winner).toFixed(2), this.notes[i].Note);
+            this.notes[i] = new PNote((this.notes[i].Length / winner), this.notes[i].Note);
         }
 
         // compress chords down
