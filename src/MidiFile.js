@@ -1,33 +1,32 @@
 "use strict";
-var MidiHeader = (function () {
-    function MidiHeader(formatype, trackCount, ticksPerBeat) {
+Object.defineProperty(exports, "__esModule", { value: true });
+class MidiHeader {
+    constructor(formatype, trackCount, ticksPerBeat) {
         this.formatType = formatype;
         this.trackCount = trackCount;
         this.ticksPerBeat = ticksPerBeat;
     }
-    return MidiHeader;
-}());
-var Chunk = (function () {
-    function Chunk(newid, newlength, newdata) {
+}
+class Chunk {
+    constructor(newid, newlength, newdata) {
         this.id = newid;
         this.length = newlength;
         this.data = newdata;
     }
-    return Chunk;
-}());
-var Midifile = (function () {
-    function Midifile(data) {
-        this.tracks = new Array();
-        var ticksPerBeat;
+}
+class Midifile {
+    constructor(data) {
+        this.tracks = [];
+        let ticksPerBeat;
         this.stream = new StringStream(data);
-        var headerChunk = this.readChunk(this.stream);
+        const headerChunk = Midifile.readChunk(this.stream);
         if (headerChunk.id !== "MThd" || headerChunk.length !== 6) {
             throw "Bad .mid file - header not found";
         }
-        var headerStream = new StringStream(headerChunk.data);
-        var formatType = headerStream.readInt16();
-        var trackCount = headerStream.readInt16();
-        var timeDivision = headerStream.readInt16();
+        const headerStream = new StringStream(headerChunk.data);
+        const formatType = headerStream.readInt16();
+        const trackCount = headerStream.readInt16();
+        const timeDivision = headerStream.readInt16();
         if (timeDivision & 0x8000) {
             throw "Expressing time division in SMTPE frames is not supported yet";
         }
@@ -35,35 +34,36 @@ var Midifile = (function () {
             ticksPerBeat = timeDivision;
         }
         this.header = new MidiHeader(formatType, trackCount, ticksPerBeat);
-        for (var i = 0; i < this.header.trackCount; i++) {
+        for (let i = 0; i < this.header.trackCount; i++) {
             this.tracks[i] = new Array();
-            var trackChunk = this.readChunk(this.stream);
+            let trackChunk = Midifile.readChunk(this.stream);
             if (trackChunk.id !== "MTrk") {
                 throw "Unexpected chunk - expected MTrk, got " + trackChunk.id;
             }
-            var trackStream = new StringStream(trackChunk.data);
+            let trackStream = new StringStream(trackChunk.data);
             while (!trackStream.eof()) {
-                var event = this.readEvent(trackStream);
+                const event = this.readEvent(trackStream);
                 this.tracks[i].push(event);
+                //console.log(event);
             }
         }
     }
-    Midifile.prototype.readChunk = function (stream) {
-        var id = stream.read(4);
-        var length = stream.readInt32();
+    static readChunk(stream) {
+        const id = stream.read(4);
+        const length = stream.readInt32();
         return new Chunk(id, length, stream.read(length));
-    };
-    Midifile.prototype.readEvent = function (stream) {
-        var event = ({});
+    }
+    readEvent(stream) {
+        const event = ({});
         event.deltaTime = stream.readVarInt();
-        var eventTypeByte = stream.readInt8();
+        let eventTypeByte = stream.readInt8();
         if ((eventTypeByte & 0xf0) === 0xf0) {
             /* system / meta event */
-            var length;
+            let length;
             if (eventTypeByte === 0xff) {
                 /* meta event */
                 event.type = "meta";
-                var subtypeByte = stream.readInt8();
+                const subtypeByte = stream.readInt8();
                 length = stream.readVarInt();
                 switch (subtypeByte) {
                     case 0x00:
@@ -123,7 +123,7 @@ var Midifile = (function () {
                         event.subtype = "smpteOffset";
                         if (length !== 5)
                             throw "Expected length for smpteOffset event is 5, got " + length;
-                        var hourByte = stream.readInt8();
+                        const hourByte = stream.readInt8();
                         event.frameRate = {
                             0x00: 24, 0x20: 25, 0x40: 29, 0x60: 30
                         }[hourByte & 0x60];
@@ -159,6 +159,8 @@ var Midifile = (function () {
                         event.data = stream.read(length);
                         return event;
                 }
+                //event.data = stream.read(length);
+                //return event;
             }
             else if (eventTypeByte === 0xf0) {
                 event.type = "sysEx";
@@ -178,7 +180,7 @@ var Midifile = (function () {
         }
         else {
             /* channel event */
-            var param1;
+            let param1;
             if ((eventTypeByte & 0x80) === 0) {
                 /* running status - reuse lastEventTypeByte as the event type.
                     eventTypeByte is actually the first parameter
@@ -190,7 +192,7 @@ var Midifile = (function () {
                 param1 = stream.readInt8();
                 this.lastEventTypeByte = eventTypeByte;
             }
-            var eventType = eventTypeByte >> 4;
+            const eventType = eventTypeByte >> 4;
             event.channel = eventTypeByte & 0x0f;
             event.type = "channel";
             switch (eventType) {
@@ -232,60 +234,65 @@ var Midifile = (function () {
                     event.value = param1 + (stream.readInt8() << 7);
                     return event;
                 default:
-                    throw "Unrecognised MIDI event type: " + eventType;
+                    throw `Unrecognised MIDI event type: ${eventType}`;
+                /*
+                console.log("Unrecognised MIDI event type: " + eventType);
+                stream.readInt8();
+                event.subtype = 'unknown';
+                return event;
+                */
             }
         }
-    };
-    return Midifile;
-}());
+    }
+}
 exports.Midifile = Midifile;
 /* Wrapper for accessing strings through sequential reads */
-var StringStream = (function () {
-    function StringStream(inputstring) {
+class StringStream {
+    constructor(inputstring) {
         this.position = 0;
         this.str = inputstring;
     }
-    StringStream.prototype.read = function (length) {
-        var result = this.str.substr(this.position, length);
+    read(length) {
+        const result = this.str.substr(this.position, length);
         this.position += length;
         return result;
-    };
+    }
     /* read a big-endian 32-bit integer */
-    StringStream.prototype.readInt32 = function () {
-        var result = ((this.str.charCodeAt(this.position) << 24)
+    readInt32() {
+        const result = ((this.str.charCodeAt(this.position) << 24)
             + (this.str.charCodeAt(this.position + 1) << 16)
             + (this.str.charCodeAt(this.position + 2) << 8)
             + this.str.charCodeAt(this.position + 3));
         this.position += 4;
         return result;
-    };
+    }
     /* read a big-endian 16-bit integer */
-    StringStream.prototype.readInt16 = function () {
-        var result = ((this.str.charCodeAt(this.position) << 8)
+    readInt16() {
+        const result = ((this.str.charCodeAt(this.position) << 8)
             + this.str.charCodeAt(this.position + 1));
         this.position += 2;
         return result;
-    };
+    }
     /* read an 8-bit integer */
-    StringStream.prototype.readInt8 = function (signed) {
-        var result = this.str.charCodeAt(this.position);
+    readInt8(signed) {
+        let result = this.str.charCodeAt(this.position);
         if (signed && result > 127) {
             result -= 256;
         }
         this.position += 1;
         return result;
-    };
-    StringStream.prototype.eof = function () {
+    }
+    eof() {
         return this.position >= this.str.length;
-    };
+    }
     /* read a MIDI-style variable-length integer
         (big-endian value in groups of 7 bits,
         with top bit set to signify that another byte follows)
     */
-    StringStream.prototype.readVarInt = function () {
-        var result = 0;
+    readVarInt() {
+        let result = 0;
         while (true) {
-            var b = this.readInt8();
+            const b = this.readInt8();
             if (b & 0x80) {
                 result += (b & 0x7f);
                 result <<= 7;
@@ -295,7 +302,6 @@ var StringStream = (function () {
                 return result + b;
             }
         }
-    };
-    return StringStream;
-}());
+    }
+}
 //# sourceMappingURL=MidiFile.js.map

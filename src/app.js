@@ -1,12 +1,13 @@
 "use strict";
-var processing_1 = require("./processing");
-window.onload = function () {
+Object.defineProperty(exports, "__esModule", { value: true });
+const processing_1 = require("./processing");
+window.onload = () => {
     document.getElementById("file").addEventListener("change", readFile, false);
     function readFile(evt) {
-        var files = evt.target.files;
-        var file = files[0];
-        var reader = new FileReader();
-        reader.addEventListener("load", function () {
+        let files = evt.target.files;
+        let file = files[0];
+        let reader = new FileReader();
+        reader.addEventListener("load", () => {
             processing_1.parsethefile(reader.result);
         });
         reader.readAsBinaryString(file);
