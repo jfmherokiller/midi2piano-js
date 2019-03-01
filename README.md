@@ -7,4 +7,4 @@ As of right now its pretty stupid because it pretty much dumps the midi notes in
 
 if you want to try it out in its current form look here
 
-https://jfmherokiller.github.io/midi2spu/
+https://jfmherokiller.github.io/midi2piano-js/
