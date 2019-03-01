@@ -1097,8 +1097,6 @@ class Form1_port {
         this.PerformNoteCompression();
         this.NearlyDoneBits();
         this.GenerateOutput();
-        console.log(this.OutputTxt);
-        this.notes.entries();
     }
     PerformNoteCompression() {
         // compress redundant accidentals/octaves
@@ -1225,6 +1223,8 @@ function parsethefile(midi) {
     let fileStuff = new midi2piano_port_1.Form1_port();
     fileStuff.importMIDIToolStripMenuItem_Click_Port(midi);
     let download = require("downloadjs");
+    let OutputPanel = document.getElementById("PianoOutput");
+    OutputPanel.value = fileStuff.OutputTxt;
     download(fileStuff.OutputTxt, "songtest.txt", "text/plain");
     console.log("AAAAAAA");
 }
