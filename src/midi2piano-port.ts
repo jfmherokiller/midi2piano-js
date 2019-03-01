@@ -76,8 +76,6 @@ class Form1_port {
         this.PerformNoteCompression();
         this.NearlyDoneBits();
         this.GenerateOutput();
-        console.log(this.OutputTxt);
-        this.notes.entries();
     }
 
     PerformNoteCompression() {
