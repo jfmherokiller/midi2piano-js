@@ -34,26 +34,28 @@ class Form1_port {
     public importMIDIToolStripMenuItem_Click_Port(midiString: string) {
         this.notes = [];
         let curNote = PNote.Default;
-        let tempo = 1;
-        let timeSig = 4;
 
         // first, we pull midi data
         let RealS = new Midifile(midiString);
         this.tempo = GetTempo(RealS);
         // quickly see if there's a piano track first
         // and get the tempo as well
-        let Onetrack = [].concat(...RealS.tracks);
+        let Onetrack = RealS.tracks.filter(function (track) {
+           return track.find(function (event) {
+               return event.subtype == "noteOn";
+           });
+        })[0];
         //sort by delta time
         // Onetrack = Onetrack.sort(function (left: IEvent, right: IEvent) {
-        //    if (left.deltaTime < right.deltaTime) return -1;
-        //    if (left.deltaTime > right.deltaTime) return 1;
-        //    return 0;
-        //});
+        //     if (left.deltaTime < right.deltaTime) return -1;
+        //     if (left.deltaTime > right.deltaTime) return 1;
+        //     return 0;
+        // });
         //set all to first Channel
-        Onetrack = Onetrack.map(function (value: IEvent) {
-            value.channel = 1;
-            return value;
-        });
+        //Onetrack = Onetrack.map(function (value: IEvent) {
+        //    value.channel = 1;
+        //    return value;
+        //);
         //filter to note on events
         //Onetrack = Onetrack.filter(element => element.subtype == "noteOn");
         //Onetrack = this.RemoveDuplicateNotes(Onetrack);
@@ -189,10 +191,10 @@ class Form1_port {
         let output = "";
         let lineCount = 1;
         for (let n of this.notes) {
-            if (line.length + n.Note.length + 1 > 51) {
+            if (line.length + n.Note.length + 1 > 501) {
                 output += line.substring(0, line.length - 1) + "\r\n";
                 line = "";
-                if (lineCount == 50)
+                if (lineCount == 9)
                     break;
                 lineCount++;
             }

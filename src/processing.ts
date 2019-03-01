@@ -1,14 +1,12 @@
 ﻿
 import {Midifile} from "./MidiFile";
-import {getnotes, CreateDBLines, GetTempo, CreateFileString} from "./utilityfunctions";
+import {Form1_port} from "./midi2piano-port";
 
 function parsethefile(midi: string) {
-    let midicontent = new Midifile(midi);
-    let tempo = GetTempo(midicontent);
-    let dblines: string[][] = CreateDBLines(getnotes(midicontent));
-    let file = CreateFileString(dblines, tempo);
+    let fileStuff = new Form1_port();
+    fileStuff.importMIDIToolStripMenuItem_Click_Port(midi);
     let download = require("downloadjs");
-    download(file.join(""), "songtest.txt", "text/plain");
+    download(fileStuff.OutputTxt, "songtest.txt", "text/plain");
     console.log("AAAAAAA");
 }
 export {parsethefile}

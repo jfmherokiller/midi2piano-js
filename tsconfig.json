@@ -18,7 +18,6 @@
     "src/MidiFile.ts",
     "src/ported-classes.ts",
     "src/midi2piano-port.ts",
-    "src/midi2piano-original.ts",
     "src/commandline-main.ts"
   ]
 }
