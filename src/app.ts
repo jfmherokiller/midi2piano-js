@@ -150,8 +150,9 @@ class MidiPlayer2 {
         let mythis = this;
         this.audioContext.resume();
         const o = document.getElementById('cntls');
-        let html = ``;
+        let html = `<p id="tmr"></p>`;
         html = `${html}<p id="tmr"><button id="playButton">Play</button></p>`;
+        html = `${html}<p id="tmr"><button id="StopButton">Stop</button></p>`;
         html = `${html}<p><input id="position" type="range" min="0" max="100" value="0" step="1" /></p>`;
         html = html + '<h3>Channels</h3>';
         for (let i = 0; i < song.tracks.length; i++) {
@@ -176,6 +177,9 @@ class MidiPlayer2 {
         };
         document.getElementById("playButton").addEventListener("click",function () {
             mythis.go();
+        });
+        document.getElementById("StopButton").addEventListener("click",function () {
+            mythis.stopped = true;
         });
         console.log('Tracks');
         for (let i = 0; i < song.tracks.length; i++) {
@@ -314,3 +318,4 @@ class MidiPlayer2 {
         return buf;
     }
 }
+
