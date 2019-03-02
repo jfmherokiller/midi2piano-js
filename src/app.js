@@ -137,7 +137,7 @@ class MidiPlayer2 {
         let mythis = this;
         this.audioContext.resume();
         const o = document.getElementById('cntls');
-        let html = `<h2 id="wrng">Refresh browser page to load another song</h2>`;
+        let html = ``;
         html = `${html}<p id="tmr"><button id="playButton">Play</button></p>`;
         html = `${html}<p><input id="position" type="range" min="0" max="100" value="0" step="1" /></p>`;
         html = html + '<h3>Channels</h3>';
